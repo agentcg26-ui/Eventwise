@@ -537,7 +537,13 @@ async function getGoogleToken() {
   };
   const b64 = s => btoa(unescape(encodeURIComponent(JSON.stringify(s)))).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
   const unsigned = `${b64(header)}.${b64(payload)}`;
-  const keyStr = cfg.saKey.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\n/g, '');
+  // Normalize key: handle literal \n, real newlines, headers, and whitespace
+  const rawKey = cfg.saKey
+    .replace(/\\n/g, '\n')
+    .replace(/-----BEGIN PRIVATE KEY-----/g, '')
+    .replace(/-----END PRIVATE KEY-----/g, '')
+    .replace(/\s+/g, '');
+  const keyStr = rawKey.replace(/[^A-Za-z0-9+/=]/g, '');
   const keyBytes = Uint8Array.from(atob(keyStr), c => c.charCodeAt(0));
   const cryptoKey = await crypto.subtle.importKey('pkcs8', keyBytes, { name:'RSASSA-PKCS1-v1_5', hash:'SHA-256' }, false, ['sign']);
   const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', cryptoKey, new TextEncoder().encode(unsigned));
