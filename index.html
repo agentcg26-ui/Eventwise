@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cantellus Group — Events Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f12;
+    --surface: #14171c;
+    --surface2: #1c2028;
+    --border: #262c36;
+    --accent: #c8a96e;
+    --accent2: #e8c98e;
+    --text: #e8e6e0;
+    --text2: #8a8a8a;
+    --text3: #555;
+    --green: #4caf7d;
+    --red: #e05c5c;
+    --blue: #5c8de0;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo { font-family: 'DM Serif Display', serif; font-size: 1.3rem; color: var(--accent); letter-spacing: 0.02em; }
+  .logo span { color: var(--text2); font-size: 0.85rem; font-family: 'DM Sans', sans-serif; margin-left: 10px; font-weight: 300; }
+  .nav { display: flex; gap: 4px; }
+  .nav-btn {
+    background: none; border: none; color: var(--text2); font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: all 0.15s;
+    font-weight: 500;
+  }
+  .nav-btn:hover { color: var(--text); background: var(--surface2); }
+  .nav-btn.active { color: var(--accent); background: rgba(200,169,110,0.1); }
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+  .btn {
+    font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 500;
+    padding: 8px 18px; border-radius: 7px; cursor: pointer; transition: all 0.15s; border: none;
+  }
+  .btn-primary { background: var(--accent); color: #0d0f12; }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-sm { padding: 5px 12px; font-size: 0.8rem; }
+  .btn-ghost { background: none; border: 1px solid var(--border); color: var(--text2); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger { background: rgba(224,92,92,0.15); color: var(--red); border: 1px solid rgba(224,92,92,0.3); }
+  .btn-danger:hover { background: rgba(224,92,92,0.25); }
+
+  /* LAYOUT */
+  .app { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 64px); }
+  .main { flex: 1; overflow-y: auto; padding: 32px; }
+
+  /* TABS */
+  .tab { display: none; }
+  .tab.active { display: block; }
+
+  /* DASHBOARD */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 22px 24px;
+  }
+  .stat-label { font-size: 0.75rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .stat-value { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--accent); }
+  .stat-sub { font-size: 0.75rem; color: var(--text3); margin-top: 4px; }
+
+  .section-title {
+    font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--text);
+    margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;
+  }
+
+  /* TABLE */
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .table-toolbar { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .search-input {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 0.875rem; padding: 8px 14px;
+    border-radius: 7px; outline: none; flex: 1; min-width: 200px;
+    transition: border-color 0.15s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--text3); }
+  select.search-input { cursor: pointer; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th { background: var(--surface2); color: var(--text2); font-weight: 500; text-align: left; padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; white-space: nowrap; }
+  th:hover { color: var(--accent); }
+  td { padding: 13px 16px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .badge {
+    display: inline-block; padding: 3px 9px; border-radius: 100px; font-size: 0.72rem;
+    font-weight: 500; letter-spacing: 0.03em;
+  }
+  .badge-green { background: rgba(76,175,125,0.15); color: var(--green); }
+  .badge-blue { background: rgba(92,141,224,0.15); color: var(--blue); }
+  .badge-yellow { background: rgba(200,169,110,0.15); color: var(--accent); }
+  .badge-red { background: rgba(224,92,92,0.15); color: var(--red); }
+  .badge-gray { background: var(--surface2); color: var(--text2); }
+
+  /* PAGINATION */
+  .pagination { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .page-info { font-size: 0.8rem; color: var(--text2); }
+  .page-btns { display: flex; gap: 4px; }
+  .page-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text2); font-size: 0.8rem; padding: 5px 10px; border-radius: 5px; cursor: pointer; transition: all 0.1s; }
+  .page-btn:hover, .page-btn.active { background: var(--accent); color: #0d0f12; border-color: var(--accent); }
+  .page-btn:disabled { opacity: 0.3; cursor: default; }
+
+  /* CALENDAR */
+  .calendar-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+  .cal-nav { background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-size: 1.2rem; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .cal-nav:hover { border-color: var(--accent); color: var(--accent); }
+  .cal-month { font-family: 'DM Serif Display', serif; font-size: 1.3rem; }
+  .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+  .cal-day-header { text-align: center; font-size: 0.72rem; text-transform: uppercase; color: var(--text3); padding: 6px; letter-spacing: 0.08em; }
+  .cal-day {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    min-height: 90px; padding: 8px; cursor: pointer; transition: border-color 0.15s;
+    position: relative;
+  }
+  .cal-day:hover { border-color: var(--accent); }
+  .cal-day.other-month { opacity: 0.35; }
+  .cal-day.today { border-color: var(--accent); }
+  .cal-day-num { font-size: 0.8rem; color: var(--text2); margin-bottom: 4px; }
+  .cal-day.today .cal-day-num { color: var(--accent); font-weight: 600; }
+  .cal-event-dot {
+    font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; margin-bottom: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    background: rgba(200,169,110,0.15); color: var(--accent);
+  }
+
+  /* CHAT */
+  .chat-layout { display: flex; gap: 20px; height: calc(100vh - 160px); }
+  .chat-main { flex: 1; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+  .chat-messages::-webkit-scrollbar { width: 4px; }
+  .chat-messages::-webkit-scrollbar-track { background: transparent; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .msg { display: flex; gap: 12px; max-width: 80%; }
+  .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 600; flex-shrink: 0; }
+  .msg.assistant .msg-avatar { background: rgba(200,169,110,0.2); color: var(--accent); }
+  .msg.user .msg-avatar { background: var(--surface2); color: var(--text2); }
+  .msg-bubble { padding: 12px 16px; border-radius: 12px; font-size: 0.875rem; line-height: 1.6; }
+  .msg.assistant .msg-bubble { background: var(--surface2); border: 1px solid var(--border); border-top-left-radius: 4px; }
+  .msg.user .msg-bubble { background: rgba(200,169,110,0.12); border: 1px solid rgba(200,169,110,0.2); border-top-right-radius: 4px; }
+  .msg-bubble p { margin-bottom: 8px; }
+  .msg-bubble p:last-child { margin-bottom: 0; }
+  .msg-bubble ul { padding-left: 18px; }
+  .msg-bubble li { margin-bottom: 4px; }
+  .chat-input-row { padding: 16px; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+  .chat-input {
+    flex: 1; background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 0.875rem; padding: 10px 16px;
+    border-radius: 8px; outline: none; resize: none; min-height: 44px; max-height: 120px;
+    transition: border-color 0.15s;
+  }
+  .chat-input:focus { border-color: var(--accent); }
+  .typing-indicator { display: flex; gap: 4px; padding: 8px 4px; }
+  .typing-dot { width: 7px; height: 7px; background: var(--text3); border-radius: 50%; animation: bounce 1.2s infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-8px)} }
+
+  /* EMAIL PARSER */
+  .parser-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; margin-bottom: 20px; }
+  .parser-card h3 { font-family: 'DM Serif Display', serif; font-size: 1.1rem; margin-bottom: 6px; }
+  .parser-card p { font-size: 0.875rem; color: var(--text2); margin-bottom: 20px; }
+  .status-log { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-size: 0.8rem; font-family: monospace; color: var(--text2); min-height: 120px; max-height: 200px; overflow-y: auto; }
+  .log-line { padding: 2px 0; }
+  .log-line.success { color: var(--green); }
+  .log-line.error { color: var(--red); }
+  .log-line.info { color: var(--blue); }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 999; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; width: 700px; max-width: 95vw; max-height: 90vh; overflow-y: auto; padding: 32px; }
+  .modal h2 { font-family: 'DM Serif Display', serif; font-size: 1.4rem; margin-bottom: 24px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1/-1; }
+  label { font-size: 0.78rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; }
+  input, textarea, select {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 0.875rem; padding: 9px 13px;
+    border-radius: 7px; outline: none; transition: border-color 0.15s; width: 100%;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 80px; }
+  .modal-footer { margin-top: 24px; display: flex; gap: 10px; justify-content: flex-end; }
+
+  /* SETTINGS */
+  .settings-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
+  .settings-section h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 16px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* TOAST */
+  #toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 12px 20px; border-radius: 8px; font-size: 0.875rem; z-index: 9999; transform: translateY(100px); opacity: 0; transition: all 0.3s; }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.success { border-color: var(--green); color: var(--green); }
+  #toast.error { border-color: var(--red); color: var(--red); }
+
+  /* LOADING */
+  .loading { display: flex; align-items: center; justify-content: center; padding: 60px; flex-direction: column; gap: 16px; }
+  .spinner { width: 32px; height: 32px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty { text-align: center; padding: 60px 20px; color: var(--text2); font-size: 0.875rem; }
+  .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+
+  /* IMPORT */
+  .dropzone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 40px; text-align: center; cursor: pointer; transition: all 0.2s; }
+  .dropzone:hover, .dropzone.dragover { border-color: var(--accent); background: rgba(200,169,110,0.05); }
+  .dropzone-icon { font-size: 2rem; margin-bottom: 10px; }
+  .dropzone p { color: var(--text2); font-size: 0.875rem; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  @media (max-width: 900px) {
+    .stats-grid { grid-template-columns: repeat(2,1fr); }
+    .form-grid { grid-template-columns: 1fr; }
+    .chat-layout { flex-direction: column; }
+    header { padding: 0 16px; }
+    .main { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Cantellus Events <span>/ Agent</span></div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showTab('dashboard')">Dashboard</button>
+    <button class="nav-btn" onclick="showTab('database')">Database</button>
+    <button class="nav-btn" onclick="showTab('calendar')">Calendar</button>
+    <button class="nav-btn" onclick="showTab('chat')">AI Assistant</button>
+    <button class="nav-btn" onclick="showTab('parser')">Email Parser</button>
+    <button class="nav-btn" onclick="showTab('settings')">Settings</button>
+  </nav>
+  <div class="header-actions">
+    <button class="btn btn-secondary btn-sm" onclick="syncFromSheet()">↻ Sync</button>
+    <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Add Event</button>
+  </div>
+</header>
+
+<div class="app">
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div id="tab-dashboard" class="tab active">
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card"><div class="stat-label">Total Events</div><div class="stat-value" id="stat-total">—</div><div class="stat-sub">All time</div></div>
+        <div class="stat-card"><div class="stat-label">Upcoming</div><div class="stat-value" id="stat-upcoming">—</div><div class="stat-sub">Next 90 days</div></div>
+        <div class="stat-card"><div class="stat-label">Go / Confirmed</div><div class="stat-value" id="stat-confirmed">—</div><div class="stat-sub">Tier Go status</div></div>
+        <div class="stat-card"><div class="stat-label">Avg Priority</div><div class="stat-value" id="stat-priority">—</div><div class="stat-sub">Priority score</div></div>
+      </div>
+      <div class="section-title">Upcoming Events</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Event Name</th><th>Type</th><th>Start Date</th><th>Location</th><th>Status</th><th>Priority</th>
+          </tr></thead>
+          <tbody id="dashboard-table-body">
+            <tr><td colspan="6"><div class="loading"><div class="spinner"></div><span style="color:var(--text2);font-size:.8rem">Loading events…</span></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DATABASE -->
+    <div id="tab-database" class="tab">
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input class="search-input" id="db-search" placeholder="Search events…" oninput="renderTable()" style="flex:2">
+          <select class="search-input" id="db-filter-status" onchange="renderTable()" style="flex:1">
+            <option value="">All Statuses</option>
+            <option>Active</option><option>Confirmed</option><option>Pending</option><option>Cancelled</option><option>Completed</option>
+          </select>
+          <select class="search-input" id="db-filter-type" onchange="renderTable()" style="flex:1">
+            <option value="">All Types</option>
+          </select>
+          <button class="btn btn-secondary btn-sm" onclick="openImportModal()">⬆ Import CSV/Excel</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr id="db-thead">
+                <th onclick="sortBy('Event Name')">Event Name ↕</th>
+                <th onclick="sortBy('Status')">Status ↕</th>
+                <th onclick="sortBy('Type')">Type ↕</th>
+                <th onclick="sortBy('Start Date')">Start Date ↕</th>
+                <th onclick="sortBy('Location')">Location ↕</th>
+                <th onclick="sortBy('Organization')">Organization ↕</th>
+                <th onclick="sortBy('Priority Score')">Priority ↕</th>
+                <th onclick="sortBy('TierGo/No-Go')">Tier ↕</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="db-table-body"></tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <span class="page-info" id="page-info">Loading…</span>
+          <div class="page-btns" id="page-btns"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div id="tab-calendar" class="tab">
+      <div class="calendar-header">
+        <button class="cal-nav" onclick="calPrev()">‹</button>
+        <div class="cal-month" id="cal-month-label">April 2026</div>
+        <button class="cal-nav" onclick="calNext()">›</button>
+        <button class="btn btn-ghost btn-sm" onclick="calToday()" style="margin-left:8px">Today</button>
+      </div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+    </div>
+
+    <!-- CHAT -->
+    <div id="tab-chat" class="tab">
+      <div class="chat-layout">
+        <div class="chat-main">
+          <div class="chat-messages" id="chat-messages">
+            <div class="msg assistant">
+              <div class="msg-avatar">C</div>
+              <div class="msg-bubble">
+                <p>Hello! I'm your Cantellus Events AI Assistant. I have access to all your event data and can help you:</p>
+                <ul>
+                  <li>Find and filter events by date, type, or priority</li>
+                  <li>Summarize your pipeline and upcoming schedule</li>
+                  <li>Analyze event ROI, scores, and attendance</li>
+                  <li>Answer any questions about your events database</li>
+                </ul>
+                <p>What would you like to know?</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-input-row">
+            <textarea class="chat-input" id="chat-input" placeholder="Ask about your events…" rows="1"
+              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"
+              oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+            <button class="btn btn-primary" onclick="sendChat()" id="chat-send-btn">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL PARSER -->
+    <div id="tab-parser" class="tab">
+      <div class="parser-card">
+        <h3>Email Parser</h3>
+        <p>Trigger your Google Apps Script to scan Gmail for event invitations and automatically populate the database.</p>
+        <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="triggerParser()">▶ Run Email Parser</button>
+          <button class="btn btn-secondary" onclick="clearLog()">Clear Log</button>
+        </div>
+        <div class="status-log" id="parser-log">
+          <div class="log-line info">// Ready. Press "Run Email Parser" to start.</div>
+        </div>
+      </div>
+
+      <div class="parser-card">
+        <h3>Manual Event Entry</h3>
+        <p>Paste raw email text and Claude will extract event details for you.</p>
+        <textarea id="email-paste" placeholder="Paste email content here…" style="width:100%;min-height:120px;margin-bottom:12px"></textarea>
+        <button class="btn btn-primary" onclick="parseEmailManual()">Extract Event Details</button>
+        <div id="extract-result" style="margin-top:16px"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="tab-settings" class="tab">
+      <div class="settings-section">
+        <h3>Google Sheets</h3>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>Spreadsheet ID</label>
+            <input id="cfg-sheet-id" placeholder="1boYkpsLEaq86JWfELvJfIHEqhI0ri3YfQGlxz5UyMSw">
+          </div>
+          <div class="form-group full">
+            <label>Sheet / Tab Name</label>
+            <input id="cfg-sheet-name" placeholder="Sheet1">
+          </div>
+          <div class="form-group full">
+            <label>Service Account Email</label>
+            <input id="cfg-sa-email" placeholder="eventwise@project.iam.gserviceaccount.com">
+          </div>
+          <div class="form-group full">
+            <label>Service Account Private Key</label>
+            <textarea id="cfg-sa-key" placeholder="-----BEGIN PRIVATE KEY-----&#10;...&#10;-----END PRIVATE KEY-----"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <h3>Google Apps Script</h3>
+        <div class="form-group">
+          <label>Web App URL (email parser endpoint)</label>
+          <input id="cfg-gas-url" placeholder="https://script.google.com/macros/s/.../exec">
+        </div>
+      </div>
+      <div class="settings-section">
+        <h3>Anthropic</h3>
+        <div class="form-group">
+          <label>API Key</label>
+          <input id="cfg-claude-key" type="password" placeholder="sk-ant-…">
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="saveSettings()" style="margin-top:8px">Save Settings</button>
+      <button class="btn btn-secondary" onclick="loadSettings()" style="margin-top:8px;margin-left:8px">Reset</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="event-modal">
+  <div class="modal">
+    <h2 id="modal-title">Add Event</h2>
+    <div class="form-grid" id="modal-form"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEvent()">Save Event</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal" style="max-width:500px">
+    <h2>Import Events</h2>
+    <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()"
+      ondragover="event.preventDefault();this.classList.add('dragover')"
+      ondragleave="this.classList.remove('dragover')"
+      ondrop="handleDrop(event)">
+      <div class="dropzone-icon">📂</div>
+      <p>Click or drag & drop a CSV or Excel (.xlsx) file</p>
+      <p style="font-size:.75rem;margin-top:6px;color:var(--text3)">First row should be column headers</p>
+    </div>
+    <input type="file" id="file-input" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFileImport(event)">
+    <div id="import-preview" style="margin-top:16px"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeImportModal()">Cancel</button>
+      <button class="btn btn-primary" id="import-confirm-btn" onclick="confirmImport()" style="display:none">Import to Sheet</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// =================== CONFIG ===================
+// All credentials are stored in localStorage only — never hardcoded.
+// On first launch, the user enters them in the Settings tab.
+const DEFAULTS = {
+  sheetId: '1boYkpsLEaq86JWfELvJfIHEqhI0ri3YfQGlxz5UyMSw',
+  sheetName: 'Sheet1',
+  saEmail: 'eventwise@sixth-window-492616-g7.iam.gserviceaccount.com',
+  saKey: '',
+  gasUrl: '',
+  claudeKey: ''
+};
+
+let cfg = {};
+let allEvents = [];
+let filteredEvents = [];
+let currentPage = 1;
+const PAGE_SIZE = 20;
+let sortCol = 'Start Date';
+let sortAsc = true;
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+let editingRowIndex = null;
+let importData = null;
+
+const COLUMNS = [
+  'Event Name','Status','Type','Organization','Location','Venue',
+  'Start Date','End Date','Panel Time','CFP Deadline','Materials Deadline',
+  'URL','CLE','How We Heard','Individuals','Primary Audience','Seniority',
+  'Industry','Attendance','Targeted Audience','Topic','Category',
+  'Primary Service','Secondary Service','Ideal Buyer','Buyer Notes',
+  'Cost','Deal Size','Presentation Materials','Materials Requested',
+  'Demo','Custom Content','Brand Score','Pipeline Score','Visibility Score',
+  'Cost/Value','Priority Score','TierGo/No-Go','Final Role','Attended?',
+  'Who Attended','Leads','Pre-Event Notes','Post-Event Notes','Owner / Manager'
+];
+
+// =================== SETTINGS ===================
+function loadSettings() {
+  const saved = JSON.parse(localStorage.getItem('cg_cfg') || '{}');
+  cfg = Object.assign({}, DEFAULTS, saved);
+  document.getElementById('cfg-sheet-id').value = cfg.sheetId || '';
+  document.getElementById('cfg-sheet-name').value = cfg.sheetName || '';
+  document.getElementById('cfg-sa-email').value = cfg.saEmail || '';
+  document.getElementById('cfg-sa-key').value = cfg.saKey || '';
+  document.getElementById('cfg-gas-url').value = cfg.gasUrl || '';
+  document.getElementById('cfg-claude-key').value = cfg.claudeKey || '';
+}
+function saveSettings() {
+  cfg.sheetId = document.getElementById('cfg-sheet-id').value.trim();
+  cfg.sheetName = document.getElementById('cfg-sheet-name').value.trim() || 'Sheet1';
+  cfg.saEmail = document.getElementById('cfg-sa-email').value.trim();
+  cfg.saKey = document.getElementById('cfg-sa-key').value.trim();
+  cfg.gasUrl = document.getElementById('cfg-gas-url').value.trim();
+  cfg.claudeKey = document.getElementById('cfg-claude-key').value.trim();
+  localStorage.setItem('cg_cfg', JSON.stringify(cfg));
+  showToast('Settings saved', 'success');
+}
+
+// =================== JWT / GOOGLE AUTH ===================
+async function getGoogleToken() {
+  const now = Math.floor(Date.now() / 1000);
+  const header = { alg: 'RS256', typ: 'JWT' };
+  const payload = {
+    iss: cfg.saEmail,
+    scope: 'https://www.googleapis.com/auth/spreadsheets',
+    aud: 'https://oauth2.googleapis.com/token',
+    exp: now + 3600,
+    iat: now
+  };
+  const b64 = s => btoa(unescape(encodeURIComponent(JSON.stringify(s)))).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
+  const unsigned = `${b64(header)}.${b64(payload)}`;
+  const keyStr = cfg.saKey.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\n/g, '');
+  const keyBytes = Uint8Array.from(atob(keyStr), c => c.charCodeAt(0));
+  const cryptoKey = await crypto.subtle.importKey('pkcs8', keyBytes, { name:'RSASSA-PKCS1-v1_5', hash:'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', cryptoKey, new TextEncoder().encode(unsigned));
+  const sigB64 = btoa(String.fromCharCode(...new Uint8Array(sig))).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
+  const jwt = `${unsigned}.${sigB64}`;
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST', headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`
+  });
+  const d = await res.json();
+  if (!d.access_token) throw new Error(d.error_description || 'Token error');
+  return d.access_token;
+}
+
+// =================== SHEET READ/WRITE ===================
+async function fetchSheetData() {
+  const token = await getGoogleToken();
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/${encodeURIComponent(cfg.sheetName)}`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  const d = await res.json();
+  if (!d.values || d.values.length < 2) return [];
+  const headers = d.values[0];
+  return d.values.slice(1).map(row => {
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = row[i] || '');
+    return obj;
+  });
+}
+
+async function writeRowToSheet(rowObj) {
+  const token = await getGoogleToken();
+  // First fetch to get headers
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/${encodeURIComponent(cfg.sheetName)}`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  const d = await res.json();
+  let headers = d.values ? d.values[0] : COLUMNS;
+  const row = headers.map(h => rowObj[h] || '');
+  const appendUrl = `${url}:append?valueInputOption=USER_ENTERED`;
+  await fetch(appendUrl, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values: [row] })
+  });
+}
+
+async function updateRowInSheet(rowIndex, rowObj) {
+  const token = await getGoogleToken();
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/${encodeURIComponent(cfg.sheetName)}`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  const d = await res.json();
+  const headers = d.values[0];
+  const row = headers.map(h => rowObj[h] || '');
+  const sheetRow = rowIndex + 2; // 1-indexed + header row
+  const range = `${cfg.sheetName}!A${sheetRow}`;
+  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values: [row] })
+  });
+}
+
+async function appendRowsToSheet(rows) {
+  const token = await getGoogleToken();
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/${encodeURIComponent(cfg.sheetName)}:append?valueInputOption=USER_ENTERED`;
+  const headersRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/${encodeURIComponent(cfg.sheetName)}`, { headers: { Authorization: `Bearer ${token}` } });
+  const hd = await headersRes.json();
+  let headers = hd.values ? hd.values[0] : COLUMNS;
+  if (!hd.values || hd.values.length === 0) {
+    // Write headers first
+    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/${encodeURIComponent(cfg.sheetName)}?valueInputOption=USER_ENTERED`, {
+      method: 'PUT', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values: [COLUMNS] })
+    });
+    headers = COLUMNS;
+  }
+  const values = rows.map(r => headers.map(h => r[h] || ''));
+  await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values })
+  });
+}
+
+// =================== SYNC ===================
+async function syncFromSheet() {
+  showToast('Syncing…');
+  try {
+    allEvents = await fetchSheetData();
+    localStorage.setItem('cg_events_cache', JSON.stringify(allEvents));
+    applyFiltersAndRender();
+    renderDashboard();
+    renderCalendar();
+    showToast(`Synced ${allEvents.length} events`, 'success');
+  } catch (e) {
+    console.error(e);
+    // Try cache
+    const cache = localStorage.getItem('cg_events_cache');
+    if (cache) {
+      allEvents = JSON.parse(cache);
+      applyFiltersAndRender();
+      renderDashboard();
+      renderCalendar();
+      showToast('Using cached data (sync failed: ' + e.message + ')', 'error');
+    } else {
+      showToast('Sync failed: ' + e.message, 'error');
+      document.getElementById('db-table-body').innerHTML = `<tr><td colspan="9"><div class="empty"><div class="empty-icon">⚠️</div><p>Could not load data. Check Settings and ensure the sheet is shared with the service account.</p></div></td></tr>`;
+    }
+  }
+}
+
+// =================== DASHBOARD ===================
+function renderDashboard() {
+  const now = new Date();
+  const in90 = new Date(now.getTime() + 90*24*60*60*1000);
+  const upcoming = allEvents.filter(e => { const d = new Date(e['Start Date']); return d >= now && d <= in90; });
+  const confirmed = allEvents.filter(e => (e['TierGo/No-Go']||'').toLowerCase().includes('go'));
+  const scores = allEvents.map(e => parseFloat(e['Priority Score'])).filter(n => !isNaN(n));
+  const avgScore = scores.length ? (scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1) : '—';
+  document.getElementById('stat-total').textContent = allEvents.length;
+  document.getElementById('stat-upcoming').textContent = upcoming.length;
+  document.getElementById('stat-confirmed').textContent = confirmed.length;
+  document.getElementById('stat-priority').textContent = avgScore;
+
+  const sorted = [...upcoming].sort((a,b) => new Date(a['Start Date']) - new Date(b['Start Date'])).slice(0, 10);
+  const tbody = document.getElementById('dashboard-table-body');
+  if (!sorted.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty"><div class="empty-icon">📅</div><p>No upcoming events in the next 90 days</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = sorted.map(e => `
+    <tr>
+      <td style="font-weight:500">${e['Event Name']||'—'}</td>
+      <td>${e['Type']||'—'}</td>
+      <td>${fmtDate(e['Start Date'])}</td>
+      <td>${e['Location']||'—'}</td>
+      <td>${statusBadge(e['Status'])}</td>
+      <td>${e['Priority Score'] ? `<span class="badge badge-yellow">${e['Priority Score']}</span>` : '—'}</td>
+    </tr>`).join('');
+}
+
+function statusBadge(s) {
+  if (!s) return '<span class="badge badge-gray">—</span>';
+  const l = s.toLowerCase();
+  if (l.includes('confirm') || l.includes('active')) return `<span class="badge badge-green">${s}</span>`;
+  if (l.includes('pending')) return `<span class="badge badge-yellow">${s}</span>`;
+  if (l.includes('cancel')) return `<span class="badge badge-red">${s}</span>`;
+  if (l.includes('complete')) return `<span class="badge badge-blue">${s}</span>`;
+  return `<span class="badge badge-gray">${s}</span>`;
+}
+function fmtDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  if (isNaN(dt)) return d;
+  return dt.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+
+// =================== DATABASE TABLE ===================
+function applyFiltersAndRender() {
+  const search = document.getElementById('db-search').value.toLowerCase();
+  const status = document.getElementById('db-filter-status').value;
+  const type = document.getElementById('db-filter-type').value;
+
+  // Populate type filter
+  const types = [...new Set(allEvents.map(e => e['Type']).filter(Boolean))].sort();
+  const tf = document.getElementById('db-filter-type');
+  const cur = tf.value;
+  tf.innerHTML = '<option value="">All Types</option>' + types.map(t=>`<option${t===cur?' selected':''}>${t}</option>`).join('');
+
+  filteredEvents = allEvents.filter(e => {
+    if (search && !Object.values(e).join(' ').toLowerCase().includes(search)) return false;
+    if (status && (e['Status']||'') !== status) return false;
+    if (type && (e['Type']||'') !== type) return false;
+    return true;
+  });
+
+  // Sort
+  filteredEvents.sort((a, b) => {
+    let va = a[sortCol] || '', vb = b[sortCol] || '';
+    if (sortCol.includes('Date') || sortCol.includes('Deadline')) {
+      va = new Date(va); vb = new Date(vb);
+    } else if (!isNaN(parseFloat(va))) { va = parseFloat(va); vb = parseFloat(vb); }
+    if (va < vb) return sortAsc ? -1 : 1;
+    if (va > vb) return sortAsc ? 1 : -1;
+    return 0;
+  });
+
+  currentPage = 1;
+  renderTable();
+}
+
+function renderTable() { applyFiltersAndRender2(); }
+function applyFiltersAndRender2() {
+  const start = (currentPage-1)*PAGE_SIZE;
+  const pageData = filteredEvents.slice(start, start+PAGE_SIZE);
+  const tbody = document.getElementById('db-table-body');
+
+  if (!filteredEvents.length) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty"><div class="empty-icon">🔍</div><p>No events found</p></div></td></tr>`;
+    document.getElementById('page-info').textContent = '0 events';
+    document.getElementById('page-btns').innerHTML = '';
+    return;
+  }
+
+  tbody.innerHTML = pageData.map((e, i) => {
+    const realIdx = start + i;
+    return `<tr>
+      <td style="font-weight:500;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(e['Event Name'])}">${esc(e['Event Name'])||'—'}</td>
+      <td>${statusBadge(e['Status'])}</td>
+      <td>${esc(e['Type'])||'—'}</td>
+      <td>${fmtDate(e['Start Date'])}</td>
+      <td style="max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e['Location'])||'—'}</td>
+      <td style="max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e['Organization'])||'—'}</td>
+      <td>${e['Priority Score']?`<span class="badge badge-yellow">${esc(e['Priority Score'])}</span>`:'—'}</td>
+      <td>${tierBadge(e['TierGo/No-Go'])}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="openEditModal(${realIdx})" style="margin-right:4px">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteEvent(${realIdx})">Del</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  const total = filteredEvents.length;
+  const pages = Math.ceil(total/PAGE_SIZE);
+  document.getElementById('page-info').textContent = `${start+1}–${Math.min(start+PAGE_SIZE,total)} of ${total} events`;
+  const pbtns = document.getElementById('page-btns');
+  let btns = `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+  for (let p=1;p<=pages;p++) {
+    if (pages > 7 && p > 2 && p < pages-1 && Math.abs(p-currentPage)>1) { if (p===3||p===pages-2) btns+='<span style="color:var(--text3);padding:5px">…</span>'; continue; }
+    btns += `<button class="page-btn ${p===currentPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
+  }
+  btns += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===pages?'disabled':''}>›</button>`;
+  pbtns.innerHTML = btns;
+}
+
+function goPage(p) {
+  const pages = Math.ceil(filteredEvents.length/PAGE_SIZE);
+  if (p<1||p>pages) return;
+  currentPage = p;
+  applyFiltersAndRender2();
+}
+function sortBy(col) { if (sortCol===col) sortAsc=!sortAsc; else { sortCol=col; sortAsc=true; } applyFiltersAndRender(); }
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function tierBadge(t) {
+  if (!t) return '<span class="badge badge-gray">—</span>';
+  const l = t.toLowerCase();
+  if (l.includes('go')) return `<span class="badge badge-green">${t}</span>`;
+  if (l.includes('no')) return `<span class="badge badge-red">${t}</span>`;
+  return `<span class="badge badge-gray">${t}</span>`;
+}
+
+// =================== MODAL ===================
+function openAddModal() {
+  editingRowIndex = null;
+  document.getElementById('modal-title').textContent = 'Add Event';
+  buildModalForm({});
+  document.getElementById('event-modal').classList.add('open');
+}
+function openEditModal(idx) {
+  editingRowIndex = idx;
+  document.getElementById('modal-title').textContent = 'Edit Event';
+  buildModalForm(filteredEvents[idx]);
+  document.getElementById('event-modal').classList.add('open');
+}
+function closeModal() { document.getElementById('event-modal').classList.remove('open'); }
+
+function buildModalForm(data) {
+  const priorityCols = ['Event Name','Status','Type','Organization','Location','Venue','Start Date','End Date','CFP Deadline','Materials Deadline','URL','Primary Audience','Attendance','Topic','Category','Priority Score','TierGo/No-Go','Final Role','Attended?','Who Attended','Owner / Manager','Pre-Event Notes','Post-Event Notes','Cost'];
+  const form = document.getElementById('modal-form');
+  form.innerHTML = priorityCols.map(col => {
+    const isTextarea = col.includes('Notes') || col === 'Buyer Notes';
+    const isDate = col.includes('Date') || col.includes('Deadline');
+    const val = esc(data[col]||'');
+    return `<div class="form-group${isTextarea?' full':''}">
+      <label>${col}</label>
+      ${isTextarea ? `<textarea name="${col}">${val}</textarea>` : `<input type="${isDate?'date':'text'}" name="${col}" value="${isDate&&val?toDateInputVal(val):val}">`}
+    </div>`;
+  }).join('');
+}
+function toDateInputVal(s) {
+  if (!s) return '';
+  const d = new Date(s);
+  if (isNaN(d)) return s;
+  return d.toISOString().split('T')[0];
+}
+
+async function saveEvent() {
+  const form = document.getElementById('modal-form');
+  const inputs = form.querySelectorAll('input, textarea, select');
+  const obj = {};
+  inputs.forEach(el => { obj[el.name] = el.value; });
+  if (!obj['Event Name']) { showToast('Event Name is required', 'error'); return; }
+
+  showToast('Saving…');
+  try {
+    if (editingRowIndex !== null) {
+      // Find original index in allEvents
+      const origIdx = allEvents.indexOf(filteredEvents[editingRowIndex]);
+      allEvents[origIdx] = Object.assign({}, allEvents[origIdx], obj);
+      await updateRowInSheet(origIdx, allEvents[origIdx]);
+    } else {
+      allEvents.push(obj);
+      await writeRowToSheet(obj);
+    }
+    localStorage.setItem('cg_events_cache', JSON.stringify(allEvents));
+    closeModal();
+    applyFiltersAndRender();
+    renderDashboard();
+    renderCalendar();
+    showToast('Event saved', 'success');
+  } catch (e) {
+    showToast('Save failed: ' + e.message, 'error');
+  }
+}
+
+async function deleteEvent(idx) {
+  if (!confirm('Delete this event?')) return;
+  allEvents.splice(allEvents.indexOf(filteredEvents[idx]), 1);
+  localStorage.setItem('cg_events_cache', JSON.stringify(allEvents));
+  // Re-sync to reflect deletion (sheet row deletion requires Sheets API delete, so we'll just push full data)
+  showToast('Deleted locally. Re-sync to update sheet.', 'success');
+  applyFiltersAndRender();
+  renderDashboard();
+  renderCalendar();
+}
+
+// =================== CALENDAR ===================
+function renderCalendar() {
+  const label = document.getElementById('cal-month-label');
+  label.textContent = new Date(calYear, calMonth).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const grid = document.getElementById('calendar-grid');
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const today = new Date();
+
+  let html = days.map(d=>`<div class="cal-day-header">${d}</div>`).join('');
+
+  const first = new Date(calYear, calMonth, 1);
+  const last = new Date(calYear, calMonth+1, 0);
+  const startPad = first.getDay();
+
+  // Events indexed by date string
+  const eventMap = {};
+  allEvents.forEach(e => {
+    const d = e['Start Date'];
+    if (!d) return;
+    const dt = new Date(d);
+    if (isNaN(dt)) return;
+    const key = `${dt.getFullYear()}-${dt.getMonth()}-${dt.getDate()}`;
+    if (!eventMap[key]) eventMap[key] = [];
+    eventMap[key].push(e);
+  });
+
+  // Prev month padding
+  const prevLast = new Date(calYear, calMonth, 0).getDate();
+  for (let i=startPad-1;i>=0;i--) {
+    html += `<div class="cal-day other-month"><div class="cal-day-num">${prevLast-i}</div></div>`;
+  }
+  // This month
+  for (let d=1;d<=last.getDate();d++) {
+    const isToday = d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear();
+    const key = `${calYear}-${calMonth}-${d}`;
+    const evs = eventMap[key]||[];
+    html += `<div class="cal-day${isToday?' today':''}">
+      <div class="cal-day-num">${d}</div>
+      ${evs.slice(0,3).map(e=>`<div class="cal-event-dot" title="${esc(e['Event Name'])}">${esc(e['Event Name'])}</div>`).join('')}
+      ${evs.length>3?`<div style="font-size:.65rem;color:var(--text3)">+${evs.length-3} more</div>`:''}
+    </div>`;
+  }
+  // Next month padding
+  const endPad = 6 - last.getDay();
+  for (let i=1;i<=endPad;i++) html += `<div class="cal-day other-month"><div class="cal-day-num">${i}</div></div>`;
+
+  grid.innerHTML = html;
+}
+function calPrev() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); }
+function calNext() { calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); }
+function calToday() { calYear=new Date().getFullYear(); calMonth=new Date().getMonth(); renderCalendar(); }
+
+// =================== CHAT ===================
+let chatHistory = [];
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = ''; input.style.height = 'auto';
+
+  addMsg('user', text);
+  chatHistory.push({ role: 'user', content: text });
+
+  const btn = document.getElementById('chat-send-btn');
+  btn.disabled = true;
+  const typingId = addTyping();
+
+  // Build context summary of events
+  const eventSummary = buildEventContext();
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': cfg.claudeKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        system: `You are the Cantellus Group Events AI Assistant. You have access to the following events database. Answer questions about events concisely and helpfully. Format responses with markdown when helpful.\n\nEVENTS DATABASE (${allEvents.length} total events):\n${eventSummary}`,
+        messages: chatHistory
+      })
+    });
+    const d = await res.json();
+    removeTyping(typingId);
+    const reply = d.content?.[0]?.text || 'Sorry, I could not get a response.';
+    addMsg('assistant', reply);
+    chatHistory.push({ role: 'assistant', content: reply });
+    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+  } catch (e) {
+    removeTyping(typingId);
+    addMsg('assistant', 'Error: ' + e.message);
+  }
+  btn.disabled = false;
+}
+
+function buildEventContext() {
+  if (!allEvents.length) return 'No events loaded yet.';
+  const sample = allEvents.slice(0, 50); // Send up to 50 events for context
+  return sample.map(e =>
+    `- "${e['Event Name']||'?'}" | ${e['Type']||''} | ${e['Start Date']||''} | ${e['Location']||''} | Status: ${e['Status']||''} | Tier: ${e['TierGo/No-Go']||''} | Priority: ${e['Priority Score']||''} | Org: ${e['Organization']||''}`
+  ).join('\n') + (allEvents.length > 50 ? `\n... and ${allEvents.length-50} more events.` : '');
+}
+
+function addMsg(role, text) {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.innerHTML = `
+    <div class="msg-avatar">${role==='assistant'?'C':'Y'}</div>
+    <div class="msg-bubble">${formatMsgText(text)}</div>
+  `;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function formatMsgText(t) {
+  return t
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/`(.*?)`/g,'<code style="background:var(--bg);padding:2px 5px;border-radius:3px;font-size:.8rem">$1</code>')
+    .replace(/^#{1,3} (.*)/gm,'<strong>$1</strong>')
+    .replace(/^[-•] (.*)/gm,'<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/s,'<ul>$1</ul>')
+    .replace(/\n/g,'<br>');
+}
+
+function addTyping() {
+  const msgs = document.getElementById('chat-messages');
+  const id = 'typing-' + Date.now();
+  const div = document.createElement('div');
+  div.className = 'msg assistant'; div.id = id;
+  div.innerHTML = `<div class="msg-avatar">C</div><div class="msg-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return id;
+}
+function removeTyping(id) { const el = document.getElementById(id); if (el) el.remove(); }
+
+// =================== EMAIL PARSER ===================
+async function triggerParser() {
+  if (!cfg.gasUrl) {
+    showToast('Set Google Apps Script URL in Settings first', 'error');
+    log('error', 'ERROR: No Google Apps Script URL configured. Go to Settings.');
+    return;
+  }
+  log('info', `> Calling email parser at ${cfg.gasUrl}…`);
+  try {
+    const res = await fetch(cfg.gasUrl, { method: 'POST', mode: 'no-cors' });
+    log('success', '> Request sent. The script will run and update the sheet.');
+    log('info', '> Press "Sync" in the header to load new events after the script finishes.');
+    showToast('Parser triggered', 'success');
+  } catch (e) {
+    log('error', '> Error: ' + e.message);
+    showToast('Parser error: ' + e.message, 'error');
+  }
+}
+
+async function parseEmailManual() {
+  const emailText = document.getElementById('email-paste').value.trim();
+  if (!emailText) { showToast('Paste some email content first', 'error'); return; }
+  if (!cfg.claudeKey) { showToast('Set Anthropic API key in Settings', 'error'); return; }
+
+  document.getElementById('extract-result').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': cfg.claudeKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        system: `Extract event details from the email text and return ONLY a valid JSON object with these keys (leave empty string if not found): ${COLUMNS.join(', ')}. Return only raw JSON, no markdown.`,
+        messages: [{ role: 'user', content: emailText }]
+      })
+    });
+    const d = await res.json();
+    const raw = d.content?.[0]?.text || '{}';
+    let parsed;
+    try { parsed = JSON.parse(raw.replace(/```json|```/g,'')); } catch { parsed = {}; }
+
+    const html = `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px;font-size:.85rem">
+      <div style="margin-bottom:12px;font-weight:600;color:var(--accent)">Extracted Event Details</div>
+      ${Object.entries(parsed).filter(([,v])=>v).map(([k,v])=>`
+        <div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--text2);min-width:160px;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em">${k}</span>
+          <span>${esc(v)}</span>
+        </div>`).join('')}
+      <div style="margin-top:16px">
+        <button class="btn btn-primary btn-sm" onclick="addExtractedEvent(${esc(JSON.stringify(JSON.stringify(parsed)))})">Add to Database</button>
+      </div>
+    </div>`;
+    document.getElementById('extract-result').innerHTML = html;
+    window._lastExtracted = parsed;
+  } catch (e) {
+    document.getElementById('extract-result').innerHTML = `<div style="color:var(--red)">Error: ${e.message}</div>`;
+  }
+}
+
+async function addExtractedEvent() {
+  if (!window._lastExtracted) return;
+  showToast('Adding event…');
+  try {
+    allEvents.push(window._lastExtracted);
+    await writeRowToSheet(window._lastExtracted);
+    localStorage.setItem('cg_events_cache', JSON.stringify(allEvents));
+    applyFiltersAndRender();
+    renderDashboard();
+    renderCalendar();
+    showToast('Event added to database', 'success');
+    document.getElementById('email-paste').value = '';
+    document.getElementById('extract-result').innerHTML = '';
+  } catch(e) { showToast('Failed: ' + e.message, 'error'); }
+}
+
+function log(type, msg) {
+  const log = document.getElementById('parser-log');
+  log.innerHTML += `<div class="log-line ${type}">[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+  log.scrollTop = log.scrollHeight;
+}
+function clearLog() { document.getElementById('parser-log').innerHTML = '<div class="log-line info">// Log cleared.</div>'; }
+
+// =================== IMPORT ===================
+function openImportModal() { document.getElementById('import-modal').classList.add('open'); }
+function closeImportModal() { document.getElementById('import-modal').classList.remove('open'); importData = null; document.getElementById('import-preview').innerHTML = ''; document.getElementById('import-confirm-btn').style.display='none'; }
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropzone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) processImportFile(file);
+}
+function handleFileImport(e) { if (e.target.files[0]) processImportFile(e.target.files[0]); }
+
+function processImportFile(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'binary' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      importData = rows;
+      document.getElementById('import-preview').innerHTML = `
+        <div style="color:var(--green);font-size:.875rem;margin-bottom:8px">✓ Found ${rows.length} rows</div>
+        <div style="color:var(--text2);font-size:.8rem">Columns: ${Object.keys(rows[0]||{}).join(', ')}</div>
+      `;
+      document.getElementById('import-confirm-btn').style.display = 'inline-block';
+    } catch(err) {
+      document.getElementById('import-preview').innerHTML = `<div style="color:var(--red)">Error reading file: ${err.message}</div>`;
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+
+async function confirmImport() {
+  if (!importData || !importData.length) return;
+  showToast('Importing…');
+  try {
+    await appendRowsToSheet(importData);
+    importData.forEach(r => allEvents.push(r));
+    localStorage.setItem('cg_events_cache', JSON.stringify(allEvents));
+    closeImportModal();
+    applyFiltersAndRender();
+    renderDashboard();
+    renderCalendar();
+    showToast(`Imported ${importData.length} events`, 'success');
+  } catch(e) {
+    showToast('Import failed: ' + e.message, 'error');
+  }
+}
+
+// =================== NAV ===================
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  event.target.classList.add('active');
+  if (tab === 'database') applyFiltersAndRender();
+  if (tab === 'calendar') renderCalendar();
+}
+
+// =================== TOAST ===================
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'show ' + type;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = ''; }, 3000);
+}
+
+// =================== INIT ===================
+loadSettings();
+
+// Show setup banner if credentials are missing
+function checkFirstRun() {
+  if (!cfg.claudeKey || !cfg.saKey) {
+    const banner = document.createElement('div');
+    banner.id = 'setup-banner';
+    banner.style.cssText = 'position:fixed;top:64px;left:0;right:0;background:#c8a96e;color:#0d0f12;text-align:center;padding:10px 20px;font-size:.875rem;font-weight:500;z-index:200;display:flex;align-items:center;justify-content:center;gap:12px';
+    banner.innerHTML = `⚙️ First time? Enter your API keys to get started. <button onclick="showTab2('settings');document.getElementById('setup-banner').remove()" style="background:#0d0f12;color:#c8a96e;border:none;padding:5px 14px;border-radius:5px;cursor:pointer;font-weight:600;font-size:.8rem">Go to Settings →</button>`;
+    document.body.appendChild(banner);
+  }
+}
+function showTab2(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelectorAll('.nav-btn')[5].classList.add('active');
+}
+checkFirstRun();
+
+// Try cache first for instant load
+const cached = localStorage.getItem('cg_events_cache');
+if (cached) {
+  try {
+    allEvents = JSON.parse(cached);
+    renderDashboard();
+    applyFiltersAndRender();
+    renderCalendar();
+  } catch(e) {}
+}
+// Then sync fresh data
+syncFromSheet();
+</script>
+</body>
+</html>
